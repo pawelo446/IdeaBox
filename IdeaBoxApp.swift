@@ -23,7 +23,24 @@ struct IdeaBoxApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     let persistenceController = PersistenceController.shared
     func applicationWillTerminate(_ notification: Notification) {
-        print("UMIERAAAAM")
+        let context = persistenceController.container.viewContext
+
+        if !context.commitEditing() {
+            NSLog("\(NSStringFromClass(type(of: self))) unable to commit editing before saving")
+        }
+        if context.hasChanges {
+            do {
+                try context.save()
+            } catch {
+                // Customize this code block to include application-specific recovery steps.
+                let nserror = error as NSError
+                NSApplication.shared.presentError(nserror)
+            }
+        }
+    }
+    
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        //UnitTestHelper.deleteAllNotes(container: persistenceController.container)
     }
     
     @IBAction func saveAction(_ sender: AnyObject?) {
